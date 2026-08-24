@@ -1,0 +1,18 @@
+~~ lineWidth: 30 ~~
+== should format with line width 30 ==
+#let long_function_name(parameter_one, parameter_two, parameter_three) = {
+  parameter_one + parameter_two + parameter_three
+}
+
+[expect]
+#let long_function_name(
+  parameter_one,
+  parameter_two,
+  parameter_three,
+) = {
+  (
+    parameter_one
+      + parameter_two
+      + parameter_three
+  )
+}

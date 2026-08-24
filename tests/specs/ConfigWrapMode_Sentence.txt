@@ -1,0 +1,8 @@
+~~ wrapMode: sentence ~~
+== wrapMode sentence ==
+First sentence. Second sentence. Third sentence.
+
+[expect]
+First sentence.
+Second sentence.
+Third sentence.

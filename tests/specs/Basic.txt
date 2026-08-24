@@ -1,0 +1,17 @@
+== should format markup and code with defaults ==
+#let add(a, b) = {
+a + b
+}
+
+= Heading
+
+This is a paragraph with #add(1, 2).
+
+[expect]
+#let add(a, b) = {
+  a + b
+}
+
+= Heading
+
+This is a paragraph with #add(1, 2).

@@ -1,0 +1,8 @@
+~~ wrapMode: fill, lineWidth: 40 ~~
+== wrapMode fill ==
+This is a long sentence that should be wrapped under wrapMode fill. Here is another sentence.
+
+[expect]
+This is a long sentence that should be
+wrapped under wrapMode fill. Here is
+another sentence.

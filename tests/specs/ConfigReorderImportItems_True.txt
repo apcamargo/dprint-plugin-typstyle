@@ -1,0 +1,6 @@
+~~ reorderImportItems: true ~~
+== should reorder import items when true ==
+#import "module.typ": c, a, b
+
+[expect]
+#import "module.typ": a, b, c

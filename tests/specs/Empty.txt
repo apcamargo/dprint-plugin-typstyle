@@ -1,0 +1,4 @@
+== should format empty file to single newline ==
+
+[expect]
+

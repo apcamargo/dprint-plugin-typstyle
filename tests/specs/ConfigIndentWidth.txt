@@ -1,0 +1,10 @@
+~~ indentWidth: 4 ~~
+== should format with indent width 4 ==
+#let add(a, b) = {
+a + b
+}
+
+[expect]
+#let add(a, b) = {
+    a + b
+}

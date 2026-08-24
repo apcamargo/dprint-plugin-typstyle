@@ -1,0 +1,6 @@
+~~ collapseMarkupSpaces: true ~~
+== collapse markup spaces true ==
+Hello     world.
+
+[expect]
+Hello world.

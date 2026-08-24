@@ -1,0 +1,19 @@
+~~ blankLinesUpperBound: 3 ~~
+== blank lines upper bound 3 ==
+#{
+  let a = 1;
+
+
+
+
+  let b = 2;
+}
+
+[expect]
+#{
+  let a = 1
+
+
+
+  let b = 2
+}

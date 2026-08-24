@@ -1,0 +1,16 @@
+~~ blankLinesUpperBound: 0 ~~
+== blank lines upper bound 0 ==
+#{
+  let a = 1;
+
+
+
+
+  let b = 2;
+}
+
+[expect]
+#{
+  let a = 1
+  let b = 2
+}

@@ -1,0 +1,33 @@
+[package]
+name = "dprint-plugin-typstyle"
+version = "0.0.1"
+authors = ["Antonio Camargo <antoniop.camargo@gmail.com>"]
+edition = "2024"
+homepage = "https://github.com/apcamargo/dprint-plugin-typstyle"
+keywords = ["formatter", "formatting", "typst", "typstyle"]
+license = "Apache-2.0"
+repository = "https://github.com/apcamargo/dprint-plugin-typstyle"
+description = "Typst formatter for dprint via Typstyle."
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+dprint-core = { version = "0.69.1", default-features = false }
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = { version = "1.0", optional = true }
+typst-syntax = "0.15.1"
+typstyle-core = "0.15.1"
+
+[dev-dependencies]
+dprint-development = "0.11.0"
+pretty_assertions = "1.4.0"
+serde_json = "1.0"
+
+[features]
+wasm = ["dprint-core/wasm", "serde_json"]
+
+[profile.release]
+opt-level = 3
+lto = true
+panic = "abort"
