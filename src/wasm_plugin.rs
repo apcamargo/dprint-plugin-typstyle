@@ -45,10 +45,8 @@ impl SyncPluginHandler<Configuration> for TypstylePluginHandler {
       version: VERSION.to_string(),
       config_key: "typstyle".to_string(),
       help_url: "https://github.com/apcamargo/dprint-plugin-typstyle#readme".to_string(),
-      config_schema_url: format!(
-        "https://github.com/apcamargo/dprint-plugin-typstyle/releases/download/{VERSION}/schema.json"
-      ),
-      update_url: None,
+      config_schema_url: format!("https://plugins.dprint.dev/apcamargo/typstyle/{VERSION}/schema.json"),
+      update_url: Some("https://plugins.dprint.dev/apcamargo/typstyle/latest.json".to_string()),
     }
   }
 

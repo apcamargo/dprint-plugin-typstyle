@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/apcamargo/dprint-plugin-typstyle/releases/download/0.0.0/schema.json",
+  "$id": "https://plugins.dprint.dev/apcamargo/typstyle/0.0.0/schema.json",
   "type": "object",
   "properties": {
     "lineWidth": {
