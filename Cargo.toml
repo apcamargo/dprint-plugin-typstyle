@@ -1,6 +1,6 @@
 [package]
 name = "dprint-plugin-typstyle"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Antonio Camargo <antoniop.camargo@gmail.com>"]
 edition = "2024"
 homepage = "https://github.com/apcamargo/dprint-plugin-typstyle"
