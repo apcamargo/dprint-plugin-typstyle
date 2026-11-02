@@ -6,19 +6,27 @@ use dprint_core::configuration::ParseConfigurationError;
 use dprint_core::configuration::ResolveConfigurationResult;
 use dprint_core::configuration::get_nullable_value;
 use dprint_core::configuration::get_unknown_property_diagnostics;
+use dprint_core::configuration::resolve_new_line_kind;
 use dprint_core::generate_str_to_from;
 use serde::{Deserialize, Serialize};
 
 /// Text wrapping mode for markup. Mirrors `typstyle_core::WrapMode`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "kebab-case")]
 pub enum WrapMode {
   None,
   Fill,
   Sentence,
+  FillSentence,
 }
 
-generate_str_to_from![WrapMode, [None, "none"], [Fill, "fill"], [Sentence, "sentence"]];
+generate_str_to_from![
+  WrapMode,
+  [None, "none"],
+  [Fill, "fill"],
+  [Sentence, "sentence"],
+  [FillSentence, "fill-sentence"]
+];
 
 impl From<WrapMode> for typstyle_core::WrapMode {
   fn from(mode: WrapMode) -> Self {
@@ -26,25 +34,56 @@ impl From<WrapMode> for typstyle_core::WrapMode {
       WrapMode::None => Self::None,
       WrapMode::Fill => Self::Fill,
       WrapMode::Sentence => Self::Sentence,
+      WrapMode::FillSentence => Self::FillSentence,
     }
   }
 }
 
-/// Line ending applied to Typstyle's (always LF) output.
+/// Line ending for generated breaks. Literal text inside multiline strings,
+/// multiline inline raw spans, and format-disabled source keeps its original
+/// line endings; line breaks in fenced raw blocks follow this setting.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "kebab-case")]
 pub enum LineEnding {
   Lf,
   Crlf,
+  /// CRLF only if the entire source consistently uses CRLF; otherwise LF.
+  Preserve,
+  /// Use the newline kind of the last line in the source, like dprint's
+  /// `newLineKind: "auto"`.
+  Auto,
 }
 
-generate_str_to_from![LineEnding, [Lf, "lf"], [Crlf, "crlf"]];
+generate_str_to_from![
+  LineEnding,
+  [Lf, "lf"],
+  [Crlf, "crlf"],
+  [Preserve, "preserve"],
+  [Auto, "auto"]
+];
 
 impl From<NewLineKind> for LineEnding {
   fn from(kind: NewLineKind) -> Self {
     match kind {
       NewLineKind::CarriageReturnLineFeed => Self::Crlf,
-      _ => Self::Lf,
+      NewLineKind::LineFeed => Self::Lf,
+      NewLineKind::Auto => Self::Auto,
+    }
+  }
+}
+
+impl LineEnding {
+  /// Resolves this policy for the given source. `Auto` uses dprint's rule of
+  /// taking the newline kind of the file's last line.
+  pub(crate) fn to_typstyle(self, source: &str) -> typstyle_core::LineEnding {
+    match self {
+      LineEnding::Lf => typstyle_core::LineEnding::Lf,
+      LineEnding::Crlf => typstyle_core::LineEnding::Crlf,
+      LineEnding::Preserve => typstyle_core::LineEnding::Preserve,
+      LineEnding::Auto => match resolve_new_line_kind(source, NewLineKind::Auto) {
+        "\r\n" => typstyle_core::LineEnding::Crlf,
+        _ => typstyle_core::LineEnding::Lf,
+      },
     }
   }
 }
@@ -58,7 +97,7 @@ pub struct Configuration {
   pub collapse_markup_spaces: Option<bool>,
   pub reorder_import_items: Option<bool>,
   pub wrap_mode: Option<WrapMode>,
-  pub line_ending: Option<LineEnding>,
+  pub new_line_kind: Option<LineEnding>,
 }
 
 /// Resolves configuration from a collection of key value strings.
@@ -102,7 +141,7 @@ pub fn resolve_config(
     collapse_markup_spaces: get_nullable_value(&mut config, "collapseMarkupSpaces", &mut diagnostics),
     reorder_import_items: get_nullable_value(&mut config, "reorderImportItems", &mut diagnostics),
     wrap_mode: get_nullable_value(&mut config, "wrapMode", &mut diagnostics),
-    line_ending: get_nullable_value(&mut config, "lineEnding", &mut diagnostics)
+    new_line_kind: get_nullable_value(&mut config, "newLineKind", &mut diagnostics)
       .or_else(|| global_config.new_line_kind.map(LineEnding::from)),
   };
 
@@ -137,7 +176,7 @@ mod tests {
     assert!(config.diagnostics.is_empty());
     assert_eq!(config.config.line_width, Some(100));
     assert_eq!(config.config.indent_width, Some(4));
-    assert_eq!(config.config.line_ending, Some(LineEnding::Crlf));
+    assert_eq!(config.config.new_line_kind, Some(LineEnding::Crlf));
   }
 
   #[test]
@@ -145,7 +184,7 @@ mod tests {
     let mut config_map = ConfigKeyMap::new();
     config_map.insert("lineWidth".to_string(), 120.into());
     config_map.insert("indentWidth".to_string(), 2.into());
-    config_map.insert("lineEnding".to_string(), "lf".into());
+    config_map.insert("newLineKind".to_string(), "lf".into());
 
     let global_config = GlobalConfiguration {
       line_width: Some(80),
@@ -157,7 +196,7 @@ mod tests {
     assert!(config.diagnostics.is_empty());
     assert_eq!(config.config.line_width, Some(120));
     assert_eq!(config.config.indent_width, Some(2));
-    assert_eq!(config.config.line_ending, Some(LineEnding::Lf));
+    assert_eq!(config.config.new_line_kind, Some(LineEnding::Lf));
   }
 
   #[test]
@@ -169,7 +208,7 @@ mod tests {
     config_map.insert("collapseMarkupSpaces".to_string(), true.into());
     config_map.insert("reorderImportItems".to_string(), false.into());
     config_map.insert("wrapMode".to_string(), "fill".into());
-    config_map.insert("lineEnding".to_string(), "crlf".into());
+    config_map.insert("newLineKind".to_string(), "crlf".into());
 
     let result = resolve_config(config_map, &GlobalConfiguration::default());
 
@@ -183,7 +222,7 @@ mod tests {
         collapse_markup_spaces: Some(true),
         reorder_import_items: Some(false),
         wrap_mode: Some(WrapMode::Fill),
-        line_ending: Some(LineEnding::Crlf),
+        new_line_kind: Some(LineEnding::Crlf),
       }
     );
   }
@@ -233,7 +272,7 @@ mod tests {
     let kinds = [
       (NewLineKind::CarriageReturnLineFeed, LineEnding::Crlf),
       (NewLineKind::LineFeed, LineEnding::Lf),
-      (NewLineKind::Auto, LineEnding::Lf),
+      (NewLineKind::Auto, LineEnding::Auto),
     ];
     for (kind, expected) in kinds {
       let global_config = GlobalConfiguration {
@@ -241,7 +280,7 @@ mod tests {
         ..Default::default()
       };
       let config = resolve_config(ConfigKeyMap::new(), &global_config);
-      assert_eq!(config.config.line_ending, Some(expected), "for {kind:?}");
+      assert_eq!(config.config.new_line_kind, Some(expected), "for {kind:?}");
     }
   }
 }

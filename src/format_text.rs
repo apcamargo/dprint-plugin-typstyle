@@ -28,9 +28,8 @@ pub fn format_text(
     return Err(message.into());
   }
 
-  let typstyle = Typstyle::new(to_typstyle_config(config));
+  let typstyle = Typstyle::new(to_typstyle_config(config, input_text));
   let formatted = typstyle.format_source(source).render()?;
-  let formatted = apply_line_ending(formatted, config);
 
   if formatted == input_text {
     Ok(None)
@@ -39,8 +38,9 @@ pub fn format_text(
   }
 }
 
-/// Unset properties keep Typstyle's defaults.
-fn to_typstyle_config(config: &Configuration) -> Config {
+/// Unset properties keep Typstyle's defaults, including `new_line_kind` which
+/// defaults to Typstyle's `Preserve`.
+fn to_typstyle_config(config: &Configuration, source: &str) -> Config {
   let mut result = Config::default();
 
   if let Some(value) = config.line_width {
@@ -61,14 +61,7 @@ fn to_typstyle_config(config: &Configuration) -> Config {
   if let Some(value) = config.wrap_mode {
     result.wrap_mode = value.into();
   }
+  result.line_ending = config.new_line_kind.unwrap_or(LineEnding::Preserve).to_typstyle(source);
 
   result
-}
-
-/// Typstyle always renders LF, so one replace cannot produce `\r\r\n`.
-fn apply_line_ending(text: String, config: &Configuration) -> String {
-  match config.line_ending {
-    Some(LineEnding::Crlf) => text.replace('\n', "\r\n"),
-    Some(LineEnding::Lf) | None => text,
-  }
 }

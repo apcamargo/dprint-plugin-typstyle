@@ -44,18 +44,27 @@
       }, {
         "const": "sentence",
         "description": "Place each sentence on its own line"
+      }, {
+        "const": "fill-sentence",
+        "description": "Place each sentence on its own line and wrap long sentences to the line width"
       }]
     },
-    "lineEnding": {
-      "description": "The line ending style to use when writing files",
+    "newLineKind": {
+      "description": "The line ending style for generated line breaks; overrides dprint's global newLineKind",
       "type": "string",
-      "default": "lf",
+      "default": "preserve",
       "oneOf": [{
+        "const": "auto",
+        "description": "Use the newline kind of the last line in the file (dprint's auto)"
+      }, {
         "const": "lf",
         "description": "Line feed."
       }, {
         "const": "crlf",
         "description": "Carriage return, line feed."
+      }, {
+        "const": "preserve",
+        "description": "Typstyle extension: carriage return, line feed only if the entire file consistently uses it; otherwise line feed."
       }]
     }
   }

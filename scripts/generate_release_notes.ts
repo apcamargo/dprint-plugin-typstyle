@@ -19,7 +19,7 @@ Add to your \`dprint.json\`:
 }
 \`\`\`
 
-Powered by \`typstyle-core\` 0.15.1.
+Powered by \`typstyle-core\` 0.15.2.
 `;
 
 console.log(text);

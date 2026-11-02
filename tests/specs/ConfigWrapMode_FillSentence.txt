@@ -1,0 +1,8 @@
+~~ wrapMode: fill-sentence, lineWidth: 40 ~~
+== wrapMode fill-sentence ==
+This is a long sentence that should be wrapped to the line width. Here is another sentence.
+
+[expect]
+This is a long sentence that should be
+wrapped to the line width.
+Here is another sentence.
