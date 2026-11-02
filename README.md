@@ -14,7 +14,7 @@ Add the plugin release URL to your `dprint.json`:
     // typstyle's config goes here
   },
   "plugins": [
-    "https://plugins.dprint.dev/apcamargo/typstyle-0.1.2.wasm"
+    "https://plugins.dprint.dev/apcamargo/typstyle-0.2.0.wasm"
   ]
 }
 ```
